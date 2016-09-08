@@ -1,9 +1,10 @@
 package com.leila.codinggame;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,25 +14,77 @@ public class GreatestNumberTest {
 
     @Test
     public void test() {
-        String[] tab = new String[]{".","-","1","2","3","4","5","6","7","8","9"};
-        final Stream<String> stringStream = new Random(2).ints().limit(100)
-                .map(operand -> Math.abs(operand))
-                .mapToObj(value -> String.valueOf(value));
+        final Random random = new Random(2);
+        final Stream<String> stringStream = random.ints().limit(100)
+                .mapToObj(value -> {
+                    final String str = String.valueOf(Math.abs(value));
+                    final int offsetTiret = Math.abs(random.nextInt()) % str.length();
+                    final int offsetPoint = Math.abs(random.nextInt()) % str.length();
+                    final StringBuilder stringBuilder = new StringBuilder(str);
+                    if (random.nextBoolean()) {
+                        stringBuilder.insert(offsetTiret, '-');
+                    }
+                    if (random.nextBoolean()) {
+                        stringBuilder.insert(offsetPoint, '.');
+                    }
+                    final String result = stringBuilder.toString();
+                    return result;
+                });
 
-        stringStream.map(s -> {
-            final ArrayList<String> tabCopy = new ArrayList<>(Arrays.asList(tab));
-            return s.chars().mapToObj(operand -> getRandomChar(operand, tabCopy)).collect(Collectors.joining());
-        }).forEach(s1 -> System.out.println(s1));
+        /*stringStream.forEach(s1 -> {
+            System.out.print(s1 + " : ");
+            final String great = great(s1);
+            System.out.println(great);
+        });*/
+        final String great = great(" - 0 0 0 0 0 0 0 .");
+        System.out.println(great);
+
     }
 
-    private String getRandomChar(int random, List<String> tab) {
-        final double index = random % tab.size();
-        final int rounded = Long.valueOf(Math.round(index)).intValue();
-        final String character = tab.get(rounded);
-        if (character.equals(".") || character.equals("-")) {
-            tab.remove(character);
+    private String great(String input) {
+        final Stream<Integer> numbers = getNumbers(input);
+        StringBuilder result;
+        if (input.contains("-")) {
+            result = new StringBuilder("-")
+                    .append(numbers
+                            .sorted()
+                            .map(integer -> String.valueOf(integer))
+                            .collect(Collectors.joining()));
+            if (input.contains(".")) {
+                result.insert(2, '.');
+            }
+        } else {
+            result = new StringBuilder(numbers
+                    .sorted(Comparator.<Integer>reverseOrder())
+                    .map(integer -> String.valueOf(integer))
+                    .collect(Collectors.joining()));
+
+            if (input.contains(".")) {
+                result.insert(result.length()-1, '.');
+            }
         }
-        return character;
+
+        String s = result.toString();
+        System.out.println("Avant : " + s);
+        if (s.matches("^[^.]*\\.?[0]+$")) {
+            s = s.split("\\.")[0];
+        }
+        if (s.matches("^[-]?[0]+$")) {
+            s = "0";
+        }
+        return s;
+    }
+
+
+    private Stream<Integer> getNumbers(String inputString) {
+        Pattern decimals = Pattern.compile("(\\d+)");
+        final Matcher matcher = decimals.matcher(inputString);
+        final StringBuilder bd = new StringBuilder();
+        while (matcher.find()) {
+            bd.append(Integer.valueOf(matcher.group(1)));
+        }
+
+        return Arrays.stream(bd.toString().split("")).map(s -> Integer.valueOf(s));
     }
 
 }
