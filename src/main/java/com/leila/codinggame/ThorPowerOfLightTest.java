@@ -24,14 +24,16 @@ public class ThorPowerOfLightTest {
         int lightX = 0;
         int lightY = 17;
 
-        int initialTX = 0;
+        int initialTX = 31;
         int initialTY = 4;
 
         final Point lightPos = new Point(lightX, lightY);
         final Point thorPos = new Point(initialTX, initialTY);
 
         while (!thorPos.equals(lightPos)) {
-            translate(thorPos, getDest(lightPos, thorPos));
+            Dest dest = getDest(lightPos, thorPos);
+            translate(thorPos, dest);
+
         }
 
     }
@@ -51,14 +53,14 @@ public class ThorPowerOfLightTest {
 
     }
 
-    private void translate(Point thorPos, Dest dest) {
+    private static void translate(Point thorPos, Dest dest) {
         System.err.print("(" + dest + ") -----> " + print(thorPos) + " -> ");
         thorPos.translate(dest.depX, dest.depY);
         System.err.println(print(thorPos));
     }
 
 
-    private Dest getDest(Point lightPos, Point thorPos) {
+    private static Dest getDest(Point lightPos, Point thorPos) {
 
         Dest result;
         int diffX = lightPos.x - thorPos.x;
@@ -111,7 +113,7 @@ public class ThorPowerOfLightTest {
         return result;
     }
 
-    private String print(Point point) {
+    private static String print(Point point) {
         return String.format("[x=%s,y=%s]", point.x, point.y);
     }
 
